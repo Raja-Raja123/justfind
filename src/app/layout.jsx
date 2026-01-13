@@ -1,4 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import AppPaddingWrapper from "@/components/layout/AppPaddingWrapper";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,10 +21,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body suppressHydrationWarning={true} className={`${geistSans.variable} ${geistMono.variable} antialiased    bg-[#E8E8E8]`}>
+        <AppPaddingWrapper>
+          {children}
+        </AppPaddingWrapper>
+       
+       
       </body>
     </html>
   );

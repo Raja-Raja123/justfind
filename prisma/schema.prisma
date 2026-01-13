@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String?
+  role      String   @default("BUSINESS")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Category {
+  id     String  @id @default(uuid())
+  name   String
+  slug   String  @unique
+  status Boolean @default(true)
+
+  subCategories SubCategory[]
+  businesses    Business[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model SubCategory {
+  id     String @id @default(uuid())
+  name   String
+  status Status @default(ACTIVE)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+model Business {
+  id    String @id @default(uuid())
+  name  String
+  phone String
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  areaId String
+  area   Area   @relation(fields: [areaId], references: [id])
+
+  images String[]
+  status BusinessStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([areaId])
+}
+
+enum BusinessStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  REJECTED
+}
+
+model State {
+  id   String @id @default(uuid())
+  name String @unique
+
+  districts District[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model District {
+  id   String @id @default(uuid())
+  name String
+
+  stateId String
+  state   State  @relation(fields: [stateId], references: [id])
+
+  areas Area[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, stateId]) // no duplicate district in same state
+  @@index([stateId])
+}
+
+model Area {
+  id   String @id @default(uuid())
+  name String
+
+  districtId String
+  district   District @relation(fields: [districtId], references: [id])
+
+  businesses Business[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, districtId]) // no duplicate area in same district
+  @@index([districtId])
+}
